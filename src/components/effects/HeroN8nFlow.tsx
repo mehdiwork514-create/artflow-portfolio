@@ -213,7 +213,6 @@ function SvgNode({
       <rect x={x + 4} y={y + 4} width={12} height={12} rx={2} fill={`${node.color}22`} />
       <foreignObject x={x + 4} y={y + 4} width={12} height={12}>
         <div
-          xmlns="http://www.w3.org/1999/xhtml"
           style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 12, height: 12 }}
         >
           <Icon size={8} color={node.color} strokeWidth={2} />
