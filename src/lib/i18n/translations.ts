@@ -42,7 +42,7 @@ export const translations = {
       subtitle: "درباره من",
       title: "خلاقیت در هر پروژه",
       description: "علاقه‌مند به ساخت محصولاتی که تفاوت ایجاد می‌کنند",
-      text: "من محمد مهدی سلیمیان هستم؛ طراح و توسعه‌دهنده وب، تدوینگر، کارشناس فتوشاپ و هنرمند منبت و معرق چوب. از طراحی سایت‌های مدرن و ریسپانسیو گرفته تا تدوین ویدیو، طراحی پوستر و ساخت تیزر — هر پروژه را با دقت و خلاقیت انجام می‌دهم. از توسعه‌دهندگان تیم پذیرش ۲۴ هستم و در توسعه بات نوبت‌دهی نوبینو مشارکت دارم. هدف من ترکیب هنر و تکنولوژی برای ارائه بهترین نتیجه به مشتریانم است.",
+      text: "من محمد مهدی سلیمیان هستم؛ طراح و توسعه‌دهنده وب، تدوینگر و هنرمند در زمینه منبت و معرق چوب.\n\nفعالیت من در حوزه طراحی و توسعه وب‌سایت‌های مدرن و ریسپانسیو، تدوین ویدیو، طراحی پوستر و ساخت تیزر متمرکز است. در کنار کارهای فنی، علاقه‌ام به هنر باعث شده نگاه متفاوتی به طراحی و اجرای پروژه‌ها داشته باشم.\n\nبه‌عنوان یکی از اعضای تیم توسعه‌دهنده پذیرش ۲۴، بات نوبت‌دهی نوبینو را طراحی و توسعه داده‌ام.\n\nتلاش می‌کنم در هر پروژه، ترکیبی از دانش فنی، دقت در اجرا و خلاقیت را به کار بگیرم تا نتیجه‌ای متناسب با نیاز و هدف پروژه ایجاد شود.",
       location: "ایران",
       tags: ["خلاق", "دقیق", "متعهد", "یادگیرنده سریع"],
       stats: {
@@ -214,7 +214,7 @@ export const translations = {
       subtitle: "About Me",
       title: "Creativity in Every Project",
       description: "Passionate about building products that make a difference",
-      text: "I'm Mohammad Mahdi Salimian — a web designer and developer, video editor, Photoshop expert, and wood carving & inlay artist. From modern responsive websites to video editing, poster design, and teaser production — I approach every project with creativity and attention to detail. I'm on the Paziresh 24 development team, contributing to Nobino, their Telegram appointment bot. My goal is blending art and technology to deliver the best results for my clients.",
+      text: "I'm Mohammad Mahdi Salimian — a web designer and developer, video editor, and artist in wood carving and inlay.\n\nMy work focuses on designing and developing modern, responsive websites, video editing, poster design, and teaser production. Alongside technical work, my passion for art gives me a distinct perspective on design and project execution.\n\nAs a member of the Paziresh 24 development team, I designed and built Nobino, the appointment booking bot.\n\nIn every project, I strive to combine technical knowledge, precision, and creativity to deliver results that match the project's needs and goals.",
       location: "Iran",
       tags: ["Creative", "Precise", "Committed", "Fast Learner"],
       stats: {

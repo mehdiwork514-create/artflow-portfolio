@@ -94,7 +94,7 @@ export const projects: Project[] = [
   {
     id: "portfolio",
     technologies: ["Next.js", "React", "Tailwind CSS", "Framer Motion"],
-    live: "#",
+    live: "https://artflow-portfolio1.netlify.app",
     gradient: "from-violet-600/40 via-indigo-500/30 to-cyan-500/40",
     accent: "#8B5CF6",
   },

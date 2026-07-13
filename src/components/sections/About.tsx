@@ -32,7 +32,7 @@ export function About() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <p className="mb-6 text-base leading-relaxed text-muted md:text-lg">
+            <p className="mb-6 whitespace-pre-line text-base leading-relaxed text-muted md:text-lg">
               {t.about.text}
             </p>
 
