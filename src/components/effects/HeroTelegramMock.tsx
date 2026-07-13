@@ -13,7 +13,9 @@ type ChatMessage = {
   keyboard?: string[];
 };
 
-export function HeroTelegramMock() {
+const DONE_PAUSE_MS = 900;
+
+export function HeroTelegramMock({ onSequenceComplete }: { onSequenceComplete?: () => void }) {
   const { isRtl } = useLanguage();
   const [visibleCount, setVisibleCount] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
@@ -72,13 +74,7 @@ export function HeroTelegramMock() {
   }, [isRtl]);
 
   useEffect(() => {
-    if (visibleCount >= messages.length) {
-      const reset = setTimeout(() => {
-        setVisibleCount(0);
-        setIsTyping(false);
-      }, 4000);
-      return () => clearTimeout(reset);
-    }
+    if (visibleCount >= messages.length) return;
 
     const next = messages[visibleCount];
     const delay = next?.from === "bot" ? 1000 : 650;
@@ -94,7 +90,14 @@ export function HeroTelegramMock() {
 
     const timer = setTimeout(() => setVisibleCount((c) => c + 1), delay);
     return () => clearTimeout(timer);
-  }, [visibleCount, messages.length]);
+  }, [visibleCount, messages]);
+
+  useEffect(() => {
+    if (visibleCount < messages.length || !onSequenceComplete) return;
+
+    const timer = setTimeout(onSequenceComplete, DONE_PAUSE_MS);
+    return () => clearTimeout(timer);
+  }, [visibleCount, messages.length, onSequenceComplete]);
 
   return (
     <div className="absolute inset-0 flex flex-col bg-[#0e1621]">

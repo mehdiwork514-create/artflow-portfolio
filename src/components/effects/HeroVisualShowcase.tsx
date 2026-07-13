@@ -24,7 +24,7 @@ const SLIDE_LABELS: Record<SlideId, string> = {
   code: "Code terminal",
   n8n: "n8n automation flow",
   telegram: "Telegram bot chat",
-  wood: "Wood craft and circuit",
+  wood: "Wood marquetry and carving",
   orb: "3D brand orb",
 };
 
@@ -58,14 +58,14 @@ function nextSlide(current: SlideId): SlideId {
   return SLIDES[(index + 1) % SLIDES.length];
 }
 
-function renderSlide(id: SlideId) {
+function renderSlide(id: SlideId, onTelegramComplete?: () => void) {
   switch (id) {
     case "code":
       return <CodeTerminal />;
     case "n8n":
       return <HeroN8nFlow />;
     case "telegram":
-      return <HeroTelegramMock />;
+      return <HeroTelegramMock onSequenceComplete={onTelegramComplete} />;
     case "wood":
       return <HeroWoodCircuit />;
     case "orb":
@@ -89,27 +89,37 @@ export function HeroVisualShowcase() {
     timersRef.current.push(id);
   }, []);
 
-  const startCycle = useCallback(() => {
-    clearTimers();
-    setIsPreparingSwitch(false);
-
+  const advanceSlide = useCallback(() => {
+    setIsPreparingSwitch(true);
     queueTimer(() => {
-      setIsPreparingSwitch(true);
+      setActive((prev) => nextSlide(prev));
+      setHasSwitched(true);
+      setIsPreparingSwitch(false);
+    }, PAUSE_BEFORE_SWITCH_MS);
+  }, [queueTimer]);
 
-      queueTimer(() => {
-        setActive((prev) => nextSlide(prev));
-        setHasSwitched(true);
-        setIsPreparingSwitch(false);
-        startCycle();
-      }, PAUSE_BEFORE_SWITCH_MS);
-    }, DISPLAY_MS);
-  }, [clearTimers, queueTimer]);
+  const scheduleSlideAdvance = useCallback(
+    (slide: SlideId) => {
+      clearTimers();
+      setIsPreparingSwitch(false);
+
+      if (slide === "telegram") return;
+
+      queueTimer(advanceSlide, DISPLAY_MS);
+    },
+    [advanceSlide, clearTimers, queueTimer],
+  );
+
+  const handleTelegramComplete = useCallback(() => {
+    clearTimers();
+    advanceSlide();
+  }, [advanceSlide, clearTimers]);
 
   useEffect(() => {
     void import("@/components/effects/HeroOrbVisual");
-    startCycle();
+    scheduleSlideAdvance(active);
     return clearTimers;
-  }, [startCycle, clearTimers]);
+  }, [active, scheduleSlideAdvance, clearTimers]);
 
   const handleManualSwitch = (item: SlideId) => {
     if (item === active) return;
@@ -117,7 +127,6 @@ export function HeroVisualShowcase() {
     setIsPreparingSwitch(false);
     setHasSwitched(true);
     setActive(item);
-    startCycle();
   };
 
   const variants = buildVariants(hasSwitched);
@@ -136,7 +145,7 @@ export function HeroVisualShowcase() {
             exit="exit"
             className="absolute left-0 top-0 h-full w-full"
           >
-            {renderSlide(active)}
+            {renderSlide(active, handleTelegramComplete)}
           </motion.div>
         </AnimatePresence>
 

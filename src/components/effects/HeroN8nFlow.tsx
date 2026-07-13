@@ -3,33 +3,37 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Bell,
   Bot,
   Braces,
-  CalendarDays,
-  Database,
   Filter,
-  GitMerge,
+  GitBranch,
   Globe,
-  Link2,
-  Mail,
-  MessageCircle,
-  Server,
-  Sparkles,
-  Stethoscope,
+  Table2,
   Zap,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import { cn } from "@/lib/utils";
 
-const NODE_CYCLE_MS = 1000;
-const TOTAL_STEPS = 15;
+const VB_W = 520;
+const VB_H = 228;
+const CYCLE_MS = 750;
+const TOTAL_STEPS = 17;
+
+const NODE_W = 34;
+const NODE_H = 30;
+const NODE_HW = NODE_W / 2;
+const NODE_HH = NODE_H / 2;
+
+const COL = [36, 98, 160, 222, 284, 346, 408, 468] as const;
+const LANE = { patient: 46, doctor: 114, fallback: 182 } as const;
+
+type NodeKind = "trigger" | "code" | "switch" | "if" | "db" | "http";
 
 type FlowNode = {
   id: string;
   label: string;
-  sub: string;
+  sub?: string;
+  kind: NodeKind;
   icon: LucideIcon;
   color: string;
   x: number;
@@ -37,127 +41,267 @@ type FlowNode = {
   step: number;
 };
 
-type FlowEdge = {
+const KIND_BORDER: Record<NodeKind, string> = {
+  trigger: "#38bdf866",
+  code: "#fb923c55",
+  switch: "#60a5fa66",
+  if: "#4ade8066",
+  db: "#f8717155",
+  http: "#a78bfa66",
+};
+
+function portOut(n: { x: number; y: number }) {
+  return { x: n.x + NODE_HW, y: n.y };
+}
+
+function portIn(n: { x: number; y: number }) {
+  return { x: n.x - NODE_HW, y: n.y };
+}
+
+function edgePath(from: { x: number; y: number }, to: { x: number; y: number }) {
+  const a = portOut(from);
+  const b = portIn(to);
+  const gap = b.x - a.x;
+  const dy = Math.abs(b.y - a.y);
+
+  if (dy < 4) {
+    const dx = Math.max(18, gap * 0.5);
+    return `M ${a.x} ${a.y} C ${a.x + dx} ${a.y}, ${b.x - dx} ${b.y}, ${b.x} ${b.y}`;
+  }
+
+  const mx = a.x + gap * 0.5;
+  return `M ${a.x} ${a.y} C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x} ${b.y}`;
+}
+
+function FlowPulse({ path, active }: { path: string; active: boolean }) {
+  if (!active) return null;
+  return (
+    <g filter="url(#glow)">
+      <motion.circle
+        r="3.5"
+        fill="#a5f3fc"
+        opacity={0.35}
+        initial={{ offsetDistance: "0%" }}
+        animate={{ offsetDistance: ["0%", "100%"] }}
+        transition={{ duration: 0.55, ease: "linear", repeat: Infinity }}
+        style={{ offsetPath: `path('${path}')` }}
+      />
+      <motion.circle
+        r="2"
+        fill="#ecfeff"
+        initial={{ offsetDistance: "0%", opacity: 0.4 }}
+        animate={{ offsetDistance: ["0%", "100%"], opacity: [0.4, 1, 1, 0.4] }}
+        transition={{ duration: 0.55, ease: "linear", repeat: Infinity }}
+        style={{ offsetPath: `path('${path}')` }}
+      />
+    </g>
+  );
+}
+
+const NODE_DEFS: (Omit<FlowNode, "sub"> & { sub?: string })[] = [
+  { id: "t1", label: "TG Trigger", kind: "trigger", icon: Bot, color: "#38BDF8", x: COL[0], y: LANE.doctor, step: 0 },
+  { id: "p1", label: "Parse Start", kind: "code", icon: Braces, color: "#FB923C", x: COL[1], y: LANE.doctor, step: 1 },
+  { id: "sw", label: "Switch", kind: "switch", icon: GitBranch, color: "#60A5FA", x: COL[2], y: LANE.doctor, step: 2 },
+  { id: "pb", label: "Pt. Build", kind: "code", icon: Braces, color: "#FB923C", x: COL[3], y: LANE.patient, step: 3 },
+  { id: "gs", label: "Get Session", kind: "db", icon: Table2, color: "#F87171", x: COL[4], y: LANE.patient, step: 4 },
+  { id: "gp", label: "Pt. Get", kind: "db", icon: Table2, color: "#F87171", x: COL[5], y: LANE.patient, step: 5 },
+  { id: "if1", label: "Found?", kind: "if", icon: Filter, color: "#4ADE80", x: COL[6], y: LANE.patient, step: 6 },
+  { id: "sb", label: "Send Btn", kind: "http", icon: Globe, color: "#A78BFA", x: COL[7], y: LANE.patient, step: 7 },
+  { id: "db_b", label: "Dr. Build", kind: "code", icon: Braces, color: "#FB923C", x: COL[3], y: LANE.doctor, step: 8 },
+  { id: "if2", label: "Linked?", kind: "if", icon: Filter, color: "#4ADE80", x: COL[4], y: LANE.doctor, step: 9 },
+  { id: "up", label: "Upsert", kind: "db", icon: Table2, color: "#F87171", x: COL[5], y: LANE.doctor, step: 10 },
+  { id: "if3", label: "Auto?", kind: "if", icon: Filter, color: "#4ADE80", x: COL[6], y: LANE.doctor, step: 11 },
+  { id: "st", label: "Send Text", kind: "http", icon: Globe, color: "#A78BFA", x: COL[7], y: LANE.doctor, step: 12 },
+  { id: "hp", label: "Help", kind: "code", icon: Braces, color: "#FB923C", x: COL[3], y: LANE.fallback, step: 13 },
+  { id: "fb", label: "Fallback", kind: "code", icon: Braces, color: "#FB923C", x: COL[4], y: LANE.fallback, step: 14 },
+  { id: "st2", label: "Send Text", kind: "http", icon: Globe, color: "#A78BFA", x: COL[7], y: LANE.fallback, step: 15 },
+];
+
+type BuiltEdge = {
   id: string;
   path: string;
   activatesAt: number;
+  label?: string;
+  labelX: number;
+  labelY: number;
+  from: { x: number; y: number };
+  to: { x: number; y: number };
 };
 
-function FlowParticle({ path, active }: { path: string; active: boolean }) {
-  if (!active) return null;
+function buildEdges(): BuiltEdge[] {
+  const n = (id: string) => {
+    const node = NODE_DEFS.find((x) => x.id === id)!;
+    return { x: node.x, y: node.y };
+  };
+
+  const defs = [
+    { id: "e0", from: n("t1"), to: n("p1"), activatesAt: 1 },
+    { id: "e1", from: n("p1"), to: n("sw"), activatesAt: 2 },
+    { id: "e2", from: n("sw"), to: n("pb"), activatesAt: 3, label: "patient" },
+    { id: "e3", from: n("pb"), to: n("gs"), activatesAt: 4 },
+    { id: "e4", from: n("gs"), to: n("gp"), activatesAt: 5 },
+    { id: "e5", from: n("gp"), to: n("if1"), activatesAt: 6 },
+    { id: "e6", from: n("if1"), to: n("sb"), activatesAt: 7, label: "true" },
+    { id: "e7", from: n("sw"), to: n("db_b"), activatesAt: 8, label: "doctor" },
+    { id: "e8", from: n("db_b"), to: n("if2"), activatesAt: 9 },
+    { id: "e9", from: n("if2"), to: n("up"), activatesAt: 10, label: "false" },
+    { id: "e10", from: n("up"), to: n("if3"), activatesAt: 11 },
+    { id: "e11", from: n("if3"), to: n("st"), activatesAt: 12, label: "true" },
+    { id: "e12", from: n("sw"), to: n("hp"), activatesAt: 13, label: "fallback" },
+    { id: "e13", from: n("hp"), to: n("fb"), activatesAt: 14 },
+    { id: "e14", from: n("fb"), to: n("st2"), activatesAt: 15 },
+  ];
+
+  return defs.map((e) => {
+    const a = portOut(e.from);
+    const b = portIn(e.to);
+    return {
+      ...e,
+      path: edgePath(e.from, e.to),
+      labelX: (a.x + b.x) / 2,
+      labelY: (a.y + b.y) / 2 - 7,
+    };
+  });
+}
+
+const EDGES = buildEdges();
+
+function SvgNode({
+  node,
+  active,
+  done,
+}: {
+  node: FlowNode;
+  active: boolean;
+  done: boolean;
+}) {
+  const Icon = node.icon;
+  const x = node.x - NODE_HW;
+  const y = node.y - NODE_HH;
+
   return (
-    <motion.circle
-      r="2"
-      fill="#34d399"
-      filter="url(#n8n-glow)"
-      initial={{ offsetDistance: "0%" }}
-      animate={{ offsetDistance: "100%" }}
-      transition={{ duration: 0.75, ease: "linear", repeat: Infinity }}
-      style={{ offsetPath: `path('${path}')` }}
-    />
+    <g>
+      {active && (
+        <rect
+          x={x - 2}
+          y={y - 2}
+          width={NODE_W + 4}
+          height={NODE_H + 4}
+          rx={6}
+          fill="none"
+          stroke="#22d3ee"
+          strokeWidth={1}
+          opacity={0.5}
+        />
+      )}
+      <rect
+        x={x}
+        y={y}
+        width={NODE_W}
+        height={NODE_H}
+        rx={4}
+        fill="#2a2f3a"
+        stroke={active ? "#22d3ee55" : KIND_BORDER[node.kind]}
+        strokeWidth={1}
+      />
+      {node.kind === "trigger" && (
+        <polygon
+          points={`${x - 5},${node.y} ${x - 1},${node.y - 3} ${x - 1},${node.y + 3}`}
+          fill="#fbbf24"
+        />
+      )}
+      <rect x={x + 4} y={y + 4} width={12} height={12} rx={2} fill={`${node.color}22`} />
+      <foreignObject x={x + 4} y={y + 4} width={12} height={12}>
+        <div
+          xmlns="http://www.w3.org/1999/xhtml"
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 12, height: 12 }}
+        >
+          <Icon size={8} color={node.color} strokeWidth={2} />
+        </div>
+      </foreignObject>
+      <text
+        x={node.x}
+        y={y + 22}
+        textAnchor="middle"
+        fill={done || active ? "#e2e8f0" : "#cbd5e1"}
+        fontSize={6.5}
+        fontFamily="ui-monospace, monospace"
+        fontWeight={500}
+      >
+        {node.label}
+      </text>
+      {node.sub && (
+        <text x={node.x} y={y + 28} textAnchor="middle" fill="#64748b" fontSize={5.5} fontFamily="ui-monospace, monospace">
+          {node.sub}
+        </text>
+      )}
+      {active && <circle cx={x + NODE_W - 2} cy={y + 2} r={2} fill="#22d3ee" />}
+    </g>
   );
 }
 
 export function HeroN8nFlow() {
   const { isRtl } = useLanguage();
   const [activeStep, setActiveStep] = useState(0);
-  const [executions, setExecutions] = useState(3847);
+  const [runs, setRuns] = useState(4821);
 
   const nodes: FlowNode[] = useMemo(
     () =>
-      isRtl
-        ? [
-            { id: "tg", label: "نوبینو", sub: "TG", icon: Bot, color: "#0EA5E9", x: 4, y: 54, step: 0 },
-            { id: "hook", label: "Webhook", sub: "POST", icon: Link2, color: "#6366F1", x: 14, y: 54, step: 1 },
-            { id: "ai", label: "NLP", sub: "AI", icon: Sparkles, color: "#A855F7", x: 24, y: 54, step: 2 },
-            { id: "http", label: "HTTP", sub: "API", icon: Globe, color: "#8B5CF6", x: 34, y: 54, step: 3 },
-            { id: "cal", label: "تقویم", sub: "Sync", icon: CalendarDays, color: "#14B8A6", x: 44, y: 54, step: 4 },
-            { id: "if", label: "IF", sub: "شرط", icon: Filter, color: "#F59E0B", x: 54, y: 54, step: 5 },
-            { id: "db", label: "DB", sub: "رزرو", icon: Database, color: "#10B981", x: 64, y: 16, step: 6 },
-            { id: "redis", label: "Redis", sub: "Cache", icon: Server, color: "#EF4444", x: 74, y: 16, step: 7 },
-            { id: "sms", label: "SMS", sub: "24h", icon: Bell, color: "#EC4899", x: 84, y: 16, step: 8 },
-            { id: "mail", label: "ایمیل", sub: "Dr.", icon: Mail, color: "#F472B6", x: 94, y: 16, step: 9 },
-            { id: "wait", label: "صف", sub: "Wait", icon: Stethoscope, color: "#F97316", x: 64, y: 88, step: 10 },
-            { id: "crm", label: "CRM", sub: "Sync", icon: Braces, color: "#FB923C", x: 74, y: 88, step: 11 },
-            { id: "reply", label: "پاسخ", sub: "TG", icon: MessageCircle, color: "#38BDF8", x: 84, y: 88, step: 12 },
-            { id: "merge", label: "Merge", sub: "Log", icon: GitMerge, color: "#22D3EE", x: 94, y: 54, step: 13 },
-          ]
-        : [
-            { id: "tg", label: "Nobino", sub: "TG", icon: Bot, color: "#0EA5E9", x: 4, y: 54, step: 0 },
-            { id: "hook", label: "Webhook", sub: "POST", icon: Link2, color: "#6366F1", x: 14, y: 54, step: 1 },
-            { id: "ai", label: "NLP", sub: "AI", icon: Sparkles, color: "#A855F7", x: 24, y: 54, step: 2 },
-            { id: "http", label: "HTTP", sub: "API", icon: Globe, color: "#8B5CF6", x: 34, y: 54, step: 3 },
-            { id: "cal", label: "Calendar", sub: "Sync", icon: CalendarDays, color: "#14B8A6", x: 44, y: 54, step: 4 },
-            { id: "if", label: "IF", sub: "Check", icon: Filter, color: "#F59E0B", x: 54, y: 54, step: 5 },
-            { id: "db", label: "DB", sub: "Book", icon: Database, color: "#10B981", x: 64, y: 16, step: 6 },
-            { id: "redis", label: "Redis", sub: "Cache", icon: Server, color: "#EF4444", x: 74, y: 16, step: 7 },
-            { id: "sms", label: "SMS", sub: "24h", icon: Bell, color: "#EC4899", x: 84, y: 16, step: 8 },
-            { id: "mail", label: "Email", sub: "Dr.", icon: Mail, color: "#F472B6", x: 94, y: 16, step: 9 },
-            { id: "wait", label: "Queue", sub: "Wait", icon: Stethoscope, color: "#F97316", x: 64, y: 88, step: 10 },
-            { id: "crm", label: "CRM", sub: "Sync", icon: Braces, color: "#FB923C", x: 74, y: 88, step: 11 },
-            { id: "reply", label: "Reply", sub: "TG", icon: MessageCircle, color: "#38BDF8", x: 84, y: 88, step: 12 },
-            { id: "merge", label: "Merge", sub: "Log", icon: GitMerge, color: "#22D3EE", x: 94, y: 54, step: 13 },
-          ],
+      NODE_DEFS.map((n) => ({
+        ...n,
+        sub: isRtl
+          ? n.id === "st2"
+            ? "راهنما"
+            : n.id === "st"
+              ? "پاسخ"
+              : n.id === "sb"
+                ? "پیام"
+                : n.sub
+          : n.sub,
+      })),
     [isRtl],
-  );
-
-  const edges: FlowEdge[] = useMemo(
-    () => [
-      { id: "e0", path: "M 22 128 L 42 128", activatesAt: 1 },
-      { id: "e1", path: "M 62 128 L 82 128", activatesAt: 2 },
-      { id: "e2", path: "M 102 128 L 122 128", activatesAt: 3 },
-      { id: "e3", path: "M 142 128 L 162 128", activatesAt: 4 },
-      { id: "e4", path: "M 182 128 L 202 128", activatesAt: 5 },
-      { id: "e5", path: "M 222 128 C 238 128, 242 48, 258 44", activatesAt: 6 },
-      { id: "e6", path: "M 278 44 L 298 44", activatesAt: 7 },
-      { id: "e7", path: "M 318 44 L 338 44", activatesAt: 8 },
-      { id: "e8", path: "M 358 44 L 378 44", activatesAt: 9 },
-      { id: "e9", path: "M 222 128 C 238 128, 242 208, 258 212", activatesAt: 10 },
-      { id: "e10", path: "M 278 212 L 298 212", activatesAt: 11 },
-      { id: "e11", path: "M 318 212 L 338 212", activatesAt: 12 },
-      { id: "e12", path: "M 358 128 L 378 128", activatesAt: 13 },
-      { id: "e13", path: "M 378 44 C 390 44, 392 128, 378 128", activatesAt: 14 },
-      { id: "e14", path: "M 378 212 C 390 212, 392 128, 378 128", activatesAt: 14 },
-    ],
-    [],
   );
 
   const statusLines = useMemo(
     () =>
       isRtl
         ? [
-            "▶ [1/14] پیام بیمار → نوبینو",
-            "▶ [2/14] Webhook POST /api/booking",
-            "▶ [3/14] NLP: intent=رزرو_نوبت",
-            "▶ [4/14] HTTP → API پذیرش ۲۴",
-            "▶ [5/14] Sync تقویم دکتر احمدی",
-            "▶ [6/14] IF: slot 10:30 available ✓",
-            "▶ [7/14] TRUE → INSERT نوبت DB",
-            "▶ [8/14] Redis cache invalidate",
-            "▶ [9/14] Schedule SMS +24h",
-            "▶ [10/14] Notify doctor email",
-            "▶ [11/14] FALSE → waitlist queue",
-            "▶ [12/14] CRM patient sync",
-            "▶ [13/14] TG reply PZ-4821",
-            "▶ [14/14] Merge → audit log",
-            "✓ Workflow OK — 847ms · 14 nodes",
+            "▶ Telegram Trigger — پیام ورودی",
+            "▶ Parse Start — استخراج mode",
+            "▶ Switch Mode",
+            "▶ patient → Patient Build",
+            "▶ Get Patient Session",
+            "▶ Patient Get By doctor_id",
+            "▶ IF Found By ID? → true",
+            "▶ Send Button Message ✓",
+            "▶ doctor → Doctor Build",
+            "▶ IF Already linked? → false",
+            "▶ Upsert Patient Session",
+            "▶ IF Auto link? → true",
+            "▶ Send Text — TG Reply ✓",
+            "▶ fallback → Help Payload",
+            "▶ Fallback Parse",
+            "▶ Send Text — Help ✓",
+            "✓ Workflow OK — Paziresh 24",
           ]
         : [
-            "▶ [1/14] Patient msg → Nobino",
-            "▶ [2/14] Webhook POST /api/booking",
-            "▶ [3/14] NLP: intent=book_appt",
-            "▶ [4/14] HTTP → Paziresh 24 API",
-            "▶ [5/14] Sync Dr. Ahmadi calendar",
-            "▶ [6/14] IF: slot 10:30 available ✓",
-            "▶ [7/14] TRUE → INSERT booking DB",
-            "▶ [8/14] Redis cache invalidate",
-            "▶ [9/14] Schedule SMS +24h",
-            "▶ [10/14] Notify doctor email",
-            "▶ [11/14] FALSE → waitlist queue",
-            "▶ [12/14] CRM patient sync",
-            "▶ [13/14] TG reply PZ-4821",
-            "▶ [14/14] Merge → audit log",
-            "✓ Workflow OK — 847ms · 14 nodes",
+            "▶ Telegram Trigger — incoming message",
+            "▶ Parse Start — extract mode",
+            "▶ Switch Mode",
+            "▶ patient → Patient Build",
+            "▶ Get Patient Session",
+            "▶ Patient Get By doctor_id",
+            "▶ IF Found By ID? → true",
+            "▶ Send Button Message ✓",
+            "▶ doctor → Doctor Build",
+            "▶ IF Already linked? → false",
+            "▶ Upsert Patient Session",
+            "▶ IF Auto link? → true",
+            "▶ Send Text — TG Reply ✓",
+            "▶ fallback → Help Payload",
+            "▶ Fallback Parse",
+            "▶ Send Text — Help ✓",
+            "✓ Workflow OK — Paziresh 24",
           ],
     [isRtl],
   );
@@ -166,183 +310,137 @@ export function HeroN8nFlow() {
     const id = setInterval(() => {
       setActiveStep((prev) => {
         const next = (prev + 1) % TOTAL_STEPS;
-        if (next === 0) setExecutions((e) => e + 1);
+        if (next === 0) setRuns((r) => r + 1);
         return next;
       });
-    }, NODE_CYCLE_MS);
+    }, CYCLE_MS);
     return () => clearInterval(id);
   }, []);
 
   return (
-    <div className="absolute inset-0 flex flex-col bg-[#060a12]">
-      <div className="flex items-center justify-between border-b border-white/5 bg-[#0c121c] px-2.5 py-1.5">
+    <div className="absolute inset-0 flex flex-col bg-[#1a1d23]">
+      <div className="flex items-center justify-between border-b border-white/5 bg-[#22252b] px-2.5 py-1.5">
         <div className="flex items-center gap-1.5">
-          <Zap size={12} className="text-emerald-400" />
-          <span className="font-mono text-[9px] font-medium text-slate-200 sm:text-[10px]">
-            {isRtl ? "n8n · نوبینو | پذیرش ۲۴" : "n8n · Nobino | Paziresh 24"}
+          <Zap size={12} className="text-amber-400" />
+          <span className="font-mono text-[9px] font-medium text-slate-200">
+            {isRtl ? "نوبینو | پذیرش ۲۴ — Workflow" : "Nobino | Paziresh 24 — Workflow"}
           </span>
         </div>
-        <div className="flex items-center gap-1">
-          <span className="rounded bg-white/5 px-1.5 py-0.5 font-mono text-[8px] text-slate-400">
-            14 {isRtl ? "نود" : "nodes"}
-          </span>
-          <span className="rounded-full bg-emerald-500/15 px-1.5 py-0.5 font-mono text-[8px] text-emerald-400">
-            live
-          </span>
-        </div>
+        <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 font-mono text-[8px] text-emerald-400">
+          {isRtl ? "فعال" : "Active"}
+        </span>
       </div>
 
-      <div className="relative min-h-0 flex-1 overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px)",
-            backgroundSize: "12px 12px",
-          }}
-        />
-
-        <div className="absolute right-2 top-2 z-20 space-y-1">
-          {["99.8%", "847ms", "14/14"].map((m, i) => (
-            <motion.span
-              key={m}
-              initial={{ opacity: 0, x: 8 }}
-              animate={{ opacity: [0.4, 0.9, 0.4], x: 0 }}
-              transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
-              className="block rounded border border-white/5 bg-black/40 px-1.5 py-0.5 font-mono text-[7px] text-emerald-400/80"
-            >
-              {m}
-            </motion.span>
-          ))}
-        </div>
-
+      <div className="relative min-h-0 flex-1 bg-[#1e2128] p-2">
         <svg
-          className="pointer-events-none absolute inset-0 h-full w-full"
-          viewBox="0 0 400 256"
+          className="h-full w-full"
+          viewBox={`0 0 ${VB_W} ${VB_H}`}
           preserveAspectRatio="xMidYMid meet"
         >
           <defs>
-            <linearGradient id="n8n-edge" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#10b981" />
-              <stop offset="50%" stopColor="#22d3ee" />
-              <stop offset="100%" stopColor="#6366f1" />
-            </linearGradient>
-            <filter id="n8n-glow">
-              <feGaussianBlur stdDeviation="1.2" result="blur" />
+            <pattern id="grid" width="14" height="14" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="0.8" fill="rgba(255,255,255,0.05)" />
+            </pattern>
+            <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation="2" result="b" />
               <feMerge>
-                <feMergeNode in="blur" />
+                <feMergeNode in="b" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
           </defs>
 
-          <text x="228" y="36" fill="rgba(52,211,153,0.45)" fontSize="7" fontFamily="monospace">
-            TRUE ↗
-          </text>
-          <text x="228" y="222" fill="rgba(249,115,22,0.45)" fontSize="7" fontFamily="monospace">
-            FALSE ↘
-          </text>
+          <rect width={VB_W} height={VB_H} fill="url(#grid)" />
 
-          {edges.map((edge) => {
-            const isLit = activeStep >= edge.activatesAt;
-            const isFlowing = activeStep === edge.activatesAt;
+          {/* lane guides */}
+          {[LANE.patient, LANE.doctor, LANE.fallback].map((ly) => (
+            <line
+              key={ly}
+              x1={8}
+              y1={ly}
+              x2={VB_W - 8}
+              y2={ly}
+              stroke="rgba(255,255,255,0.03)"
+              strokeWidth={1}
+            />
+          ))}
+
+          {EDGES.map((edge) => {
+            const lit = activeStep >= edge.activatesAt;
+            const flowing = activeStep === edge.activatesAt;
+            const a = portOut(edge.from);
+            const b = portIn(edge.to);
 
             return (
               <g key={edge.id}>
-                <path
-                  d={edge.path}
-                  fill="none"
-                  stroke="rgba(148,163,184,0.08)"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
+                <path d={edge.path} fill="none" stroke="#404a58" strokeWidth={1.5} strokeLinecap="round" />
                 <motion.path
                   d={edge.path}
                   fill="none"
-                  stroke="url(#n8n-edge)"
-                  strokeWidth="1.5"
+                  stroke={lit ? "#8b9cb3" : "#4b5563"}
+                  strokeWidth={1.5}
                   strokeLinecap="round"
-                  animate={{
-                    pathLength: isLit ? 1 : 0,
-                    opacity: isLit ? 0.85 : 0.08,
-                  }}
-                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  animate={{ opacity: lit ? 0.9 : 0.35 }}
+                  transition={{ duration: 0.2 }}
                 />
-                <FlowParticle path={edge.path} active={isFlowing} />
+                {flowing && (
+                  <motion.path
+                    d={edge.path}
+                    fill="none"
+                    stroke="#22d3ee"
+                    strokeWidth={1}
+                    strokeLinecap="round"
+                    strokeDasharray="4 6"
+                    animate={{ strokeDashoffset: [0, -20] }}
+                    transition={{ duration: 0.7, ease: "linear", repeat: Infinity }}
+                    opacity={0.6}
+                  />
+                )}
+                <circle cx={a.x} cy={a.y} r={2} fill="#6b7280" opacity={lit ? 0.85 : 0.4} />
+                <circle cx={b.x} cy={b.y} r={2} fill="#6b7280" opacity={lit ? 0.85 : 0.4} />
+                {edge.label && (
+                  <text
+                    x={edge.labelX}
+                    y={edge.labelY}
+                    textAnchor="middle"
+                    fill={lit ? "#94a3b8" : "#4b5563"}
+                    fontSize={6}
+                    fontFamily="ui-monospace, monospace"
+                  >
+                    {edge.label}
+                  </text>
+                )}
+                <FlowPulse path={edge.path} active={flowing} />
               </g>
             );
           })}
-        </svg>
 
-        {nodes.map((node) => {
-          const Icon = node.icon;
-          const isActive = activeStep === node.step;
-          const isDone = activeStep > node.step;
-
-          return (
-            <motion.div
+          {nodes.map((node) => (
+            <SvgNode
               key={node.id}
-              className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${node.x}%`, top: `${node.y}%` }}
-              animate={{ scale: isActive ? 1.12 : 1 }}
-              transition={{ duration: 0.25 }}
-            >
-              <div
-                className={cn(
-                  "relative flex w-[2.35rem] flex-col items-center gap-0.5 rounded-md border px-0.5 py-0.5 sm:w-[2.6rem]",
-                  isActive || isDone
-                    ? "border-white/20 bg-[#101828]/95"
-                    : "border-white/5 bg-[#0a0f18]/85",
-                )}
-                style={{ boxShadow: isActive ? `0 0 16px ${node.color}66` : undefined }}
-              >
-                <div
-                  className={cn(
-                    "flex h-6 w-6 items-center justify-center rounded border sm:h-7 sm:w-7",
-                    isActive || isDone ? "border-white/10 bg-white/8" : "border-white/5 bg-white/[0.02]",
-                  )}
-                >
-                  <Icon size={12} style={{ color: isActive || isDone ? node.color : "#475569" }} />
-                </div>
-                <span className="max-w-full truncate text-center text-[6px] font-bold text-slate-200 sm:text-[7px]">
-                  {node.label}
-                </span>
-                <span className="text-[5px] text-slate-500 sm:text-[6px]">{node.sub}</span>
-                {(isActive || isDone) && (
-                  <span
-                    className={cn(
-                      "absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full border border-[#060a12]",
-                      isActive ? "bg-cyan-400" : "bg-emerald-400",
-                    )}
-                  />
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
+              node={node}
+              active={activeStep === node.step}
+              done={activeStep > node.step}
+            />
+          ))}
+        </svg>
+      </div>
 
-        <motion.div
+      <div className="border-t border-white/5 bg-[#22252b] px-2.5 py-1">
+        <motion.p
           key={activeStep}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="absolute bottom-1.5 left-1.5 right-1.5 rounded-md border border-emerald-500/15 bg-black/60 px-2 py-1 backdrop-blur-md"
+          className="truncate font-mono text-[8px] text-slate-300"
         >
-          <p className="truncate font-mono text-[8px] text-emerald-300/90 sm:text-[9px]">
-            {statusLines[activeStep]}
-          </p>
-          <div className="mt-0.5 h-0.5 overflow-hidden rounded-full bg-white/5">
-            <motion.div
-              className="h-full bg-gradient-to-r from-emerald-500 via-cyan-400 to-violet-500"
-              animate={{ width: `${((activeStep + 1) / TOTAL_STEPS) * 100}%` }}
-              transition={{ duration: 0.3 }}
-            />
-          </div>
-        </motion.div>
-      </div>
-
-      <div className="flex items-center justify-between border-t border-white/5 bg-[#0c121c] px-2.5 py-1 font-mono text-[8px] text-muted">
-        <span>{executions.toLocaleString()} {isRtl ? "اجرا" : "runs"}</span>
-        <span className="text-emerald-400/70">PZ-4821</span>
+          {statusLines[activeStep]}
+        </motion.p>
+        <div className="mt-0.5 flex items-center justify-between font-mono text-[7px] text-slate-500">
+          <span>
+            {runs.toLocaleString()} {isRtl ? "اجرا" : "executions"}
+          </span>
+          <span>16 nodes · 15 {isRtl ? "اتصال" : "connections"}</span>
+        </div>
       </div>
     </div>
   );
