@@ -2,11 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot } from "lucide-react";
+import { Stethoscope } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 
-type ChatMessage = { id: number; from: "user" | "bot"; text: string };
+type ChatMessage = {
+  id: number;
+  from: "user" | "bot";
+  text: string;
+  keyboard?: string[];
+};
 
 export function HeroTelegramMock() {
   const { isRtl } = useLanguage();
@@ -17,18 +22,46 @@ export function HeroTelegramMock() {
     () =>
       isRtl
         ? [
-            { id: 1, from: "user", text: "سلام، قیمت محصول چنده؟" },
-            { id: 2, from: "bot", text: "سلام! در حال بررسی موجودی هستم..." },
-            { id: 3, from: "bot", text: "قیمت: ۲۵۰,۰۰۰ تومان ✓ موجود در انبار" },
-            { id: 4, from: "user", text: "ممنون! سفارش می‌دم." },
-            { id: 5, from: "bot", text: "عالی! لینک ثبت سفارش برای شما ارسال شد 🚀" },
+            { id: 1, from: "user", text: "سلام، می‌خوام نوبت دکتر بگیرم" },
+            {
+              id: 2,
+              from: "bot",
+              text: "به پذیرش ۲۴ خوش آمدید 🏥\nلطفاً تخصص پزشک را انتخاب کنید:",
+              keyboard: ["عمومی", "دندانپزشکی", "پوست"],
+            },
+            { id: 3, from: "user", text: "عمومی" },
+            {
+              id: 4,
+              from: "bot",
+              text: "دکتر احمدی — چهارشنبه ۲۲ تیر\n🕙 ساعت ۱۰:۳۰ — ظرفیت: ۱ نفر",
+            },
+            { id: 5, from: "user", text: "این زمان مناسبه، رزرو کن" },
+            {
+              id: 6,
+              from: "bot",
+              text: "✅ نوبت شما ثبت شد!\n📋 کد پیگیری: PZ-4821\n⏰ یادآوری ۲۴ ساعت قبل ارسال می‌شود.",
+            },
           ]
         : [
-            { id: 1, from: "user", text: "Hi, what's the product price?" },
-            { id: 2, from: "bot", text: "Hello! Checking inventory..." },
-            { id: 3, from: "bot", text: "Price: $12 — In stock ✓" },
-            { id: 4, from: "user", text: "Thanks! I'll place an order." },
-            { id: 5, from: "bot", text: "Great! Order link sent to you 🚀" },
+            { id: 1, from: "user", text: "Hi, I need a doctor appointment" },
+            {
+              id: 2,
+              from: "bot",
+              text: "Welcome to Paziresh 24 🏥\nPlease choose a specialty:",
+              keyboard: ["General", "Dental", "Dermatology"],
+            },
+            { id: 3, from: "user", text: "General" },
+            {
+              id: 4,
+              from: "bot",
+              text: "Dr. Ahmadi — Wed Jul 13\n🕙 10:30 AM — 1 slot left",
+            },
+            { id: 5, from: "user", text: "Book this slot please" },
+            {
+              id: 6,
+              from: "bot",
+              text: "✅ Appointment confirmed!\n📋 Ref: PZ-4821\n⏰ Reminder sent 24h before.",
+            },
           ],
     [isRtl],
   );
@@ -43,12 +76,12 @@ export function HeroTelegramMock() {
       const reset = setTimeout(() => {
         setVisibleCount(0);
         setIsTyping(false);
-      }, 3500);
+      }, 4000);
       return () => clearTimeout(reset);
     }
 
     const next = messages[visibleCount];
-    const delay = next?.from === "bot" ? 900 : 600;
+    const delay = next?.from === "bot" ? 1000 : 650;
 
     if (next?.from === "bot") {
       setIsTyping(true);
@@ -66,22 +99,22 @@ export function HeroTelegramMock() {
   return (
     <div className="absolute inset-0 flex flex-col bg-[#0e1621]">
       <div className="flex items-center gap-3 border-b border-white/5 bg-[#17212b] px-4 py-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/20">
-          <Bot size={18} className="text-sky-400" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/20">
+          <Stethoscope size={18} className="text-emerald-400" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-white">
-            {isRtl ? "بات فروشگاه" : "Shop Bot"}
+            {isRtl ? "پذیرش ۲۴ | نوبت‌دهی" : "Paziresh 24 | Booking"}
           </p>
           <p className="text-[10px] text-emerald-400">
-            {isRtl ? "آنلاین" : "online"}
+            {isRtl ? "بات نوبت‌دهی — آنلاین" : "Appointment bot — online"}
           </p>
         </div>
       </div>
 
       <div
         className={cn(
-          "flex flex-1 flex-col gap-2.5 overflow-hidden p-4",
+          "flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-3",
           isRtl ? "items-end" : "items-start",
         )}
       >
@@ -89,19 +122,35 @@ export function HeroTelegramMock() {
           {messages.slice(0, visibleCount).map((msg) => (
             <motion.div
               key={msg.id}
-              initial={{ opacity: 0, y: 12, scale: 0.95 }}
+              initial={{ opacity: 0, y: 10, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.35 }}
-              className={cn(
-                "max-w-[85%] rounded-2xl px-3 py-2 text-xs leading-relaxed",
-                msg.from === "user"
-                  ? "rounded-br-md bg-[#2b5278] text-white"
-                  : "rounded-bl-md bg-[#182533] text-slate-200",
-                isRtl && msg.from === "user" && "rounded-br-2xl rounded-bl-md",
-                isRtl && msg.from === "bot" && "rounded-bl-2xl rounded-br-md",
-              )}
+              transition={{ duration: 0.3 }}
+              className={cn("max-w-[92%]", isRtl ? "text-right" : "text-left")}
             >
-              {msg.text}
+              <div
+                className={cn(
+                  "rounded-2xl px-3 py-2 text-[11px] leading-relaxed whitespace-pre-line",
+                  msg.from === "user"
+                    ? "rounded-br-md bg-[#2b5278] text-white"
+                    : "rounded-bl-md bg-[#182533] text-slate-200",
+                  isRtl && msg.from === "user" && "rounded-br-2xl rounded-bl-md",
+                  isRtl && msg.from === "bot" && "rounded-bl-2xl rounded-br-md",
+                )}
+              >
+                {msg.text}
+              </div>
+              {msg.keyboard && (
+                <div className="mt-1.5 flex flex-wrap gap-1">
+                  {msg.keyboard.map((btn) => (
+                    <span
+                      key={btn}
+                      className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-2 py-1 text-[9px] font-medium text-sky-300"
+                    >
+                      {btn}
+                    </span>
+                  ))}
+                </div>
+              )}
             </motion.div>
           ))}
         </AnimatePresence>
@@ -110,12 +159,12 @@ export function HeroTelegramMock() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex items-center gap-1 rounded-2xl rounded-bl-md bg-[#182533] px-3 py-2.5"
+            className="flex items-center gap-1 rounded-2xl rounded-bl-md bg-[#182533] px-3 py-2"
           >
             {[0, 1, 2].map((i) => (
               <motion.span
                 key={i}
-                className="h-1.5 w-1.5 rounded-full bg-slate-400"
+                className="h-1.5 w-1.5 rounded-full bg-emerald-400/70"
                 animate={{ opacity: [0.3, 1, 0.3] }}
                 transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
               />
@@ -125,7 +174,7 @@ export function HeroTelegramMock() {
       </div>
 
       <div className="border-t border-white/5 bg-[#17212b] px-4 py-2 font-mono text-[10px] text-muted">
-        Telegram · {isRtl ? "بات هوشمند" : "Smart Bot"}
+        Telegram · {isRtl ? "پذیرش ۲۴ — نوبت پزشک" : "Paziresh 24 — Doctor Booking"}
       </div>
     </div>
   );

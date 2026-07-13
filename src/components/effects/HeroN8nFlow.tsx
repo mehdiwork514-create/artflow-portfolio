@@ -3,22 +3,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
+  Bell,
   Bot,
   Braces,
+  CalendarDays,
+  Database,
   Filter,
   Link2,
-  Mail,
   MessageCircle,
-  Megaphone,
-  Sheet,
+  Sparkles,
+  Stethoscope,
   Zap,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 
-const NODE_CYCLE_MS = 1600;
-const TOTAL_STEPS = 10;
+const NODE_CYCLE_MS = 1300;
+const TOTAL_STEPS = 12;
 
 type FlowNode = {
   id: string;
@@ -28,6 +30,7 @@ type FlowNode = {
   color: string;
   x: number;
   y: number;
+  step: number;
 };
 
 type FlowEdge = {
@@ -41,12 +44,12 @@ function FlowParticle({ path, active }: { path: string; active: boolean }) {
 
   return (
     <motion.circle
-      r="3.5"
-      fill="#22d3ee"
+      r="2.5"
+      fill="#34d399"
       filter="url(#n8n-glow)"
       initial={{ offsetDistance: "0%" }}
       animate={{ offsetDistance: "100%" }}
-      transition={{ duration: 1.1, ease: "easeInOut", repeat: Infinity }}
+      transition={{ duration: 0.9, ease: "easeInOut", repeat: Infinity }}
       style={{ offsetPath: `path('${path}')` }}
     />
   );
@@ -55,43 +58,52 @@ function FlowParticle({ path, active }: { path: string; active: boolean }) {
 export function HeroN8nFlow() {
   const { isRtl } = useLanguage();
   const [activeStep, setActiveStep] = useState(0);
-  const [executions, setExecutions] = useState(1284);
+  const [executions, setExecutions] = useState(3847);
 
   const nodes: FlowNode[] = useMemo(
     () =>
       isRtl
         ? [
-            { id: "tg", label: "تلگرام", sub: "Trigger", icon: Bot, color: "#0EA5E9", x: 7, y: 42 },
-            { id: "hook", label: "Webhook", sub: "POST", icon: Link2, color: "#6366F1", x: 22, y: 42 },
-            { id: "code", label: "کد JS", sub: "Function", icon: Braces, color: "#A855F7", x: 37, y: 42 },
-            { id: "if", label: "شرط IF", sub: "Branch", icon: Filter, color: "#F59E0B", x: 52, y: 42 },
-            { id: "sheet", label: "Sheet", sub: "ذخیره", icon: Sheet, color: "#10B981", x: 68, y: 18 },
-            { id: "mail", label: "ایمیل", sub: "Send", icon: Mail, color: "#EC4899", x: 84, y: 18 },
-            { id: "reply", label: "پاسخ TG", sub: "Reply", icon: MessageCircle, color: "#38BDF8", x: 68, y: 66 },
-            { id: "slack", label: "Slack", sub: "Alert", icon: Megaphone, color: "#E879F9", x: 84, y: 66 },
+            { id: "tg", label: "پذیرش۲۴", sub: "Bot", icon: Bot, color: "#0EA5E9", x: 5, y: 50, step: 0 },
+            { id: "hook", label: "Webhook", sub: "POST", icon: Link2, color: "#6366F1", x: 17, y: 50, step: 1 },
+            { id: "ai", label: "NLP", sub: "Intent", icon: Sparkles, color: "#A855F7", x: 29, y: 50, step: 2 },
+            { id: "cal", label: "تقویم", sub: "API", icon: CalendarDays, color: "#14B8A6", x: 41, y: 50, step: 3 },
+            { id: "if", label: "IF", sub: "نوبت؟", icon: Filter, color: "#F59E0B", x: 53, y: 50, step: 4 },
+            { id: "db", label: "DB", sub: "رزرو", icon: Database, color: "#10B981", x: 65, y: 22, step: 5 },
+            { id: "sms", label: "SMS", sub: "یادآور", icon: Bell, color: "#EC4899", x: 77, y: 22, step: 6 },
+            { id: "confirm", label: "تأیید", sub: "TG", icon: MessageCircle, color: "#38BDF8", x: 89, y: 22, step: 7 },
+            { id: "wait", label: "لیست", sub: "انتظار", icon: Stethoscope, color: "#F97316", x: 65, y: 78, step: 8 },
+            { id: "code", label: "کد", sub: "PZ-ID", icon: Braces, color: "#818CF8", x: 77, y: 78, step: 9 },
+            { id: "reply", label: "پاسخ", sub: "بیمار", icon: MessageCircle, color: "#22D3EE", x: 89, y: 78, step: 10 },
           ]
         : [
-            { id: "tg", label: "Telegram", sub: "Trigger", icon: Bot, color: "#0EA5E9", x: 7, y: 42 },
-            { id: "hook", label: "Webhook", sub: "POST", icon: Link2, color: "#6366F1", x: 22, y: 42 },
-            { id: "code", label: "JS Code", sub: "Function", icon: Braces, color: "#A855F7", x: 37, y: 42 },
-            { id: "if", label: "IF Node", sub: "Branch", icon: Filter, color: "#F59E0B", x: 52, y: 42 },
-            { id: "sheet", label: "Sheets", sub: "Save", icon: Sheet, color: "#10B981", x: 68, y: 18 },
-            { id: "mail", label: "Gmail", sub: "Send", icon: Mail, color: "#EC4899", x: 84, y: 18 },
-            { id: "reply", label: "TG Reply", sub: "Bot", icon: MessageCircle, color: "#38BDF8", x: 68, y: 66 },
-            { id: "slack", label: "Slack", sub: "Alert", icon: Megaphone, color: "#E879F9", x: 84, y: 66 },
+            { id: "tg", label: "Paziresh24", sub: "Bot", icon: Bot, color: "#0EA5E9", x: 5, y: 50, step: 0 },
+            { id: "hook", label: "Webhook", sub: "POST", icon: Link2, color: "#6366F1", x: 17, y: 50, step: 1 },
+            { id: "ai", label: "NLP", sub: "Intent", icon: Sparkles, color: "#A855F7", x: 29, y: 50, step: 2 },
+            { id: "cal", label: "Calendar", sub: "API", icon: CalendarDays, color: "#14B8A6", x: 41, y: 50, step: 3 },
+            { id: "if", label: "IF", sub: "Slot?", icon: Filter, color: "#F59E0B", x: 53, y: 50, step: 4 },
+            { id: "db", label: "DB", sub: "Book", icon: Database, color: "#10B981", x: 65, y: 22, step: 5 },
+            { id: "sms", label: "SMS", sub: "Remind", icon: Bell, color: "#EC4899", x: 77, y: 22, step: 6 },
+            { id: "confirm", label: "Confirm", sub: "TG", icon: MessageCircle, color: "#38BDF8", x: 89, y: 22, step: 7 },
+            { id: "wait", label: "Queue", sub: "Wait", icon: Stethoscope, color: "#F97316", x: 65, y: 78, step: 8 },
+            { id: "code", label: "Code", sub: "PZ-ID", icon: Braces, color: "#818CF8", x: 77, y: 78, step: 9 },
+            { id: "reply", label: "Reply", sub: "Patient", icon: MessageCircle, color: "#22D3EE", x: 89, y: 78, step: 10 },
           ],
     [isRtl],
   );
 
   const edges: FlowEdge[] = useMemo(
     () => [
-      { id: "e0", path: "M 38 118 L 78 118", activatesAt: 1 },
-      { id: "e1", path: "M 118 118 L 158 118", activatesAt: 2 },
-      { id: "e2", path: "M 198 118 L 238 118", activatesAt: 3 },
-      { id: "e3", path: "M 268 118 C 290 118, 295 58, 318 52", activatesAt: 4 },
-      { id: "e4", path: "M 358 52 L 398 52", activatesAt: 5 },
-      { id: "e5", path: "M 268 118 C 290 118, 295 178, 318 184", activatesAt: 6 },
-      { id: "e6", path: "M 358 184 L 398 184", activatesAt: 7 },
+      { id: "e0", path: "M 28 120 L 52 120", activatesAt: 1 },
+      { id: "e1", path: "M 82 120 L 106 120", activatesAt: 2 },
+      { id: "e2", path: "M 136 120 L 160 120", activatesAt: 3 },
+      { id: "e3", path: "M 190 120 L 214 120", activatesAt: 4 },
+      { id: "e4", path: "M 244 120 C 262 120, 268 58, 286 54", activatesAt: 5 },
+      { id: "e5", path: "M 316 54 L 340 54", activatesAt: 6 },
+      { id: "e6", path: "M 364 54 L 388 54", activatesAt: 7 },
+      { id: "e7", path: "M 244 120 C 262 120, 268 182, 286 186", activatesAt: 8 },
+      { id: "e8", path: "M 316 186 L 340 186", activatesAt: 9 },
+      { id: "e9", path: "M 364 186 L 388 186", activatesAt: 10 },
     ],
     [],
   );
@@ -100,28 +112,32 @@ export function HeroN8nFlow() {
     () =>
       isRtl
         ? [
-            "▶ دریافت پیام تلگرام...",
-            "▶ ارسال به Webhook...",
-            "▶ پردازش داده با JavaScript...",
-            "▶ ارزیابی شرط IF...",
-            "▶ شاخه TRUE → ذخیره در Sheet...",
-            "▶ ارسال ایمیل به مدیر...",
-            "▶ شاخه FALSE → پاسخ خودکار تلگرام...",
-            "▶ اعلان فوری در Slack...",
-            "▶ همگام‌سازی CRM...",
-            "✓ ورک‌فلو کامل — ۱.۲ ثانیه",
+            "▶ پیام بیمار از بات پذیرش ۲۴...",
+            "▶ Webhook دریافت درخواست نوبت...",
+            "▶ تشخیص intent: «رزرو نوبت عمومی»...",
+            "▶ بررسی تقویم دکتر احمدی...",
+            "▶ IF: نوبت ۱۰:۳۰ آزاد است ✓",
+            "▶ شاخه TRUE → ثبت در دیتابیس...",
+            "▶ زمان‌بندی SMS یادآوری ۲۴h...",
+            "▶ ارسال تأیید به تلگرام بیمار...",
+            "▶ شاخه FALSE → افزودن به لیست انتظار...",
+            "▶ تولید کد پیگیری PZ-4821...",
+            "▶ پاسخ نهایی به بیمار...",
+            "✓ نوبت ثبت شد — ۰.۹ ثانیه",
           ]
         : [
-            "▶ Receiving Telegram message...",
-            "▶ Forwarding to Webhook...",
-            "▶ Processing with JavaScript...",
-            "▶ Evaluating IF condition...",
-            "▶ TRUE branch → Save to Sheet...",
-            "▶ Sending manager email...",
-            "▶ FALSE branch → Auto Telegram reply...",
-            "▶ Posting Slack alert...",
-            "▶ Syncing CRM record...",
-            "✓ Workflow complete — 1.2s",
+            "▶ Patient message from Paziresh 24 bot...",
+            "▶ Webhook received booking request...",
+            "▶ Intent detected: general appointment...",
+            "▶ Checking Dr. Ahmadi calendar...",
+            "▶ IF: 10:30 slot available ✓",
+            "▶ TRUE → Saving to database...",
+            "▶ Scheduling 24h SMS reminder...",
+            "▶ Sending TG confirmation to patient...",
+            "▶ FALSE → Adding to waitlist queue...",
+            "▶ Generating tracking code PZ-4821...",
+            "▶ Final reply to patient...",
+            "✓ Appointment booked — 0.9s",
           ],
     [isRtl],
   );
@@ -139,53 +155,59 @@ export function HeroN8nFlow() {
 
   return (
     <div className="absolute inset-0 flex flex-col bg-[#080c14]">
-      <div className="flex items-center justify-between border-b border-white/5 bg-[#0f1520] px-4 py-2.5">
-        <div className="flex items-center gap-2">
-          <Zap size={14} className="text-orange-400" />
-          <span className="font-mono text-xs font-medium text-slate-200">
-            {isRtl ? "ورک‌فلو n8n — فروشگاه هوشمند" : "n8n Workflow — Smart Store"}
+      <div className="flex items-center justify-between border-b border-white/5 bg-[#0f1520] px-3 py-2">
+        <div className="flex items-center gap-1.5">
+          <Zap size={13} className="text-emerald-400" />
+          <span className="font-mono text-[10px] font-medium text-slate-200 sm:text-[11px]">
+            {isRtl ? "n8n — پذیرش ۲۴ نوبت‌دهی" : "n8n — Paziresh 24 Booking"}
           </span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="hidden font-mono text-[10px] text-slate-500 sm:inline">
-            {isRtl ? "اجرا:" : "runs:"} {executions.toLocaleString()}
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[9px] text-slate-500">
+            {executions.toLocaleString()} {isRtl ? "نوبت" : "runs"}
           </span>
-          <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 font-mono text-[10px] text-emerald-400">
-            {isRtl ? "● زنده" : "● live"}
+          <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 font-mono text-[9px] text-emerald-400">
+            live
           </span>
         </div>
       </div>
 
       <div className="relative min-h-0 flex-1 overflow-hidden">
         <div
-          className="absolute inset-0 opacity-40"
+          className="absolute inset-0 opacity-35"
           style={{
             backgroundImage:
-              "radial-gradient(circle, rgba(99,102,241,0.15) 1px, transparent 1px)",
-            backgroundSize: "18px 18px",
+              "radial-gradient(circle, rgba(16,185,129,0.12) 1px, transparent 1px)",
+            backgroundSize: "14px 14px",
           }}
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-cyan-500/10" />
 
         <svg
           className="pointer-events-none absolute inset-0 h-full w-full"
-          viewBox="0 0 440 240"
+          viewBox="0 0 420 240"
           preserveAspectRatio="xMidYMid meet"
         >
           <defs>
             <linearGradient id="n8n-edge" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#6366f1" />
+              <stop offset="0%" stopColor="#10b981" />
               <stop offset="50%" stopColor="#22d3ee" />
-              <stop offset="100%" stopColor="#a855f7" />
+              <stop offset="100%" stopColor="#6366f1" />
             </linearGradient>
             <filter id="n8n-glow">
-              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feGaussianBlur stdDeviation="1.5" result="blur" />
               <feMerge>
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
           </defs>
+
+          <text x="268" y="42" fill="rgba(52,211,153,0.5)" fontSize="8" fontFamily="monospace">
+            TRUE
+          </text>
+          <text x="268" y="174" fill="rgba(249,115,22,0.5)" fontSize="8" fontFamily="monospace">
+            FALSE
+          </text>
 
           {edges.map((edge) => {
             const isLit = activeStep >= edge.activatesAt;
@@ -196,22 +218,22 @@ export function HeroN8nFlow() {
                 <path
                   d={edge.path}
                   fill="none"
-                  stroke="rgba(148,163,184,0.12)"
-                  strokeWidth="2.5"
+                  stroke="rgba(148,163,184,0.1)"
+                  strokeWidth="2"
                   strokeLinecap="round"
                 />
                 <motion.path
                   d={edge.path}
                   fill="none"
                   stroke="url(#n8n-edge)"
-                  strokeWidth="2.5"
+                  strokeWidth="2"
                   strokeLinecap="round"
-                  initial={{ pathLength: 0, opacity: 0.15 }}
+                  initial={{ pathLength: 0, opacity: 0.1 }}
                   animate={{
                     pathLength: isLit ? 1 : 0,
-                    opacity: isLit ? 0.95 : 0.12,
+                    opacity: isLit ? 0.9 : 0.1,
                   }}
-                  transition={{ duration: 0.65, ease: "easeInOut" }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
                 />
                 <FlowParticle path={edge.path} active={isFlowing} />
               </g>
@@ -219,61 +241,49 @@ export function HeroN8nFlow() {
           })}
         </svg>
 
-        {nodes.map((node, index) => {
+        {nodes.map((node) => {
           const Icon = node.icon;
-          const nodeStep = index < 4 ? index : index === 4 ? 4 : index === 5 ? 5 : index === 6 ? 6 : 7;
-          const isActive = activeStep === nodeStep;
-          const isDone = activeStep > nodeStep;
+          const isActive = activeStep === node.step;
+          const isDone = activeStep > node.step;
 
           return (
             <motion.div
               key={node.id}
               className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
               style={{ left: `${node.x}%`, top: `${node.y}%` }}
-              animate={{
-                scale: isActive ? 1.08 : 1,
-                y: isActive ? -6 : 0,
-              }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
+              animate={{ scale: isActive ? 1.1 : 1 }}
+              transition={{ duration: 0.3 }}
             >
               <div
                 className={cn(
-                  "relative flex w-[4.5rem] flex-col items-center gap-1 rounded-xl border px-1.5 py-2 backdrop-blur-sm transition-all duration-500 sm:w-[5.25rem]",
+                  "relative flex w-[2.85rem] flex-col items-center gap-0.5 rounded-lg border px-0.5 py-1 backdrop-blur-sm sm:w-[3.1rem]",
                   isActive || isDone
-                    ? "border-white/25 bg-[#151d2e]/95 shadow-xl"
-                    : "border-white/8 bg-[#0d121c]/80",
+                    ? "border-white/20 bg-[#121a28]/95"
+                    : "border-white/5 bg-[#0a0f18]/90",
                 )}
                 style={{
-                  boxShadow: isActive ? `0 0 32px ${node.color}44, 0 8px 24px rgba(0,0,0,0.4)` : undefined,
+                  boxShadow: isActive ? `0 0 20px ${node.color}55` : undefined,
                 }}
               >
-                {(isActive || isDone) && (
-                  <motion.div
-                    className="absolute inset-0 rounded-xl"
-                    style={{ background: `linear-gradient(135deg, ${node.color}18, transparent)` }}
-                    animate={isActive ? { opacity: [0.5, 1, 0.5] } : { opacity: 0.6 }}
-                    transition={{ duration: 1.5, repeat: isActive ? Infinity : 0 }}
-                  />
-                )}
                 <div
                   className={cn(
-                    "relative flex h-10 w-10 items-center justify-center rounded-lg border sm:h-11 sm:w-11",
-                    isActive || isDone ? "border-white/15 bg-white/10" : "border-white/5 bg-white/[0.03]",
+                    "flex h-7 w-7 items-center justify-center rounded-md border sm:h-8 sm:w-8",
+                    isActive || isDone ? "border-white/10 bg-white/8" : "border-white/5 bg-white/[0.02]",
                   )}
                 >
                   <Icon
-                    size={20}
-                    style={{ color: isActive || isDone ? node.color : "#64748b" }}
+                    size={14}
+                    style={{ color: isActive || isDone ? node.color : "#475569" }}
                   />
                 </div>
-                <span className="relative max-w-full truncate text-center text-[9px] font-semibold text-slate-200 sm:text-[10px]">
+                <span className="max-w-full truncate text-center text-[7px] font-bold text-slate-200 sm:text-[8px]">
                   {node.label}
                 </span>
-                <span className="relative text-[8px] text-slate-500">{node.sub}</span>
+                <span className="text-[6px] text-slate-500 sm:text-[7px]">{node.sub}</span>
                 {(isActive || isDone) && (
                   <span
                     className={cn(
-                      "absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border-2 border-[#080c14]",
+                      "absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border border-[#080c14]",
                       isActive ? "bg-cyan-400" : "bg-emerald-400",
                     )}
                   />
@@ -285,26 +295,26 @@ export function HeroN8nFlow() {
 
         <motion.div
           key={activeStep}
-          initial={{ opacity: 0, y: 6 }}
+          initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute bottom-3 left-3 right-3 rounded-xl border border-cyan-500/20 bg-black/50 px-3 py-2 backdrop-blur-md"
+          className="absolute bottom-2 left-2 right-2 rounded-lg border border-emerald-500/20 bg-black/55 px-2.5 py-1.5 backdrop-blur-md"
         >
-          <p className="font-mono text-[10px] text-cyan-300 sm:text-[11px]">
+          <p className="font-mono text-[9px] leading-snug text-emerald-300/90 sm:text-[10px]">
             {statusLines[activeStep]}
           </p>
-          <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/5">
+          <div className="mt-1 h-0.5 overflow-hidden rounded-full bg-white/5">
             <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-cyan-400 to-violet-500"
+              className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-cyan-400 to-indigo-500"
               animate={{ width: `${((activeStep + 1) / TOTAL_STEPS) * 100}%` }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.35 }}
             />
           </div>
         </motion.div>
       </div>
 
-      <div className="flex items-center justify-between border-t border-white/5 bg-[#0f1520] px-4 py-2 font-mono text-[10px] text-muted">
-        <span>n8n · {isRtl ? "اتوماسیون چندشاخه‌ای" : "Multi-branch Automation"}</span>
-        <span className="text-emerald-400/80">99.8% {isRtl ? "موفق" : "success"}</span>
+      <div className="flex items-center justify-between border-t border-white/5 bg-[#0f1520] px-3 py-1.5 font-mono text-[9px] text-muted">
+        <span>{isRtl ? "اتوماسیون نوبت پزشک" : "Medical booking automation"}</span>
+        <span className="text-emerald-400/80">PZ-4821</span>
       </div>
     </div>
   );
