@@ -102,8 +102,10 @@ export const projects: Project[] = [
 
 export const experiences: Experience[] = [
   { id: "1", period: "۱۴۰۲ — اکنون", type: "work" },
-  { id: "2", period: "۱۴۰۰ — ۱۴۰۲", type: "work" },
-  { id: "3", period: "۱۳۹۸ — ۱۴۰۰", type: "work" },
+  { id: "4", period: "۱۴۰۳ — اکنون", type: "work" },
+  { id: "5", period: "۱۴۰۳ — اکنون", type: "work" },
+  { id: "2", period: "۱۴۰۳ — اکنون", type: "work" },
+  { id: "3", period: "۱۳۹۹ — اکنون", type: "work" },
 ];
 
 export const socialLinks: SocialLink[] = [

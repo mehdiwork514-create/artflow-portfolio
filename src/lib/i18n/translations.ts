@@ -123,6 +123,18 @@ export const translations = {
           description:
             "طراحی و ساخت آثار هنری منبت و معرق چوب با جزئیات ظریف و کیفیت بالا.",
         },
+        "4": {
+          title: "متخصص اتوماسیون هوشمند",
+          company: "پروژه‌های فریلنس",
+          description:
+            "طراحی و پیاده‌سازی فرایندهای خودکار با n8n و ابزارهای اتوماسیون برای کاهش کار دستی، یکپارچه‌سازی سرویس‌ها و افزایش بهره‌وری کسب‌وکارها.",
+        },
+        "5": {
+          title: "توسعه‌دهنده بات تلگرام",
+          company: "پروژه‌های مستقل",
+          description:
+            "ساخت بات‌های تلگرامی هوشمند برای پاسخگویی خودکار، مدیریت سفارش، اطلاع‌رسانی و اتصال به API و پنل‌های مدیریتی.",
+        },
       },
     },
     contact: {
@@ -283,6 +295,18 @@ export const translations = {
           description:
             "Designing and crafting wood carving and inlay art pieces with fine details and high quality.",
         },
+        "4": {
+          title: "Smart Automation Specialist",
+          company: "Freelance Projects",
+          description:
+            "Designing and implementing automated workflows with n8n and automation tools to reduce manual work, integrate services, and boost business efficiency.",
+        },
+        "5": {
+          title: "Telegram Bot Developer",
+          company: "Independent Projects",
+          description:
+            "Building smart Telegram bots for auto-replies, order management, notifications, and integration with APIs and admin panels.",
+        },
       },
     },
     contact: {
@@ -331,11 +355,15 @@ export function getExperiencePeriod(id: string, locale: Locale): string {
       "1": "۱۴۰۲ — اکنون",
       "2": "۱۴۰۳ — اکنون",
       "3": "۱۳۹۹ — اکنون",
+      "4": "۱۴۰۳ — اکنون",
+      "5": "۱۴۰۳ — اکنون",
     },
     en: {
       "1": "2023 — Present",
       "2": "2024 — Present",
       "3": "2020 — Present",
+      "4": "2024 — Present",
+      "5": "2024 — Present",
     },
   };
   return periods[locale][id] ?? "";
