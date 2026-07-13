@@ -26,7 +26,7 @@ export function HeroTelegramMock() {
             {
               id: 2,
               from: "bot",
-              text: "به پذیرش ۲۴ خوش آمدید 🏥\nلطفاً تخصص پزشک را انتخاب کنید:",
+              text: "به نوبینو خوش آمدید 🏥\nسامانه نوبت‌دهی پذیرش ۲۴\nلطفاً تخصص پزشک را انتخاب کنید:",
               keyboard: ["عمومی", "دندانپزشکی", "پوست"],
             },
             { id: 3, from: "user", text: "عمومی" },
@@ -47,7 +47,7 @@ export function HeroTelegramMock() {
             {
               id: 2,
               from: "bot",
-              text: "Welcome to Paziresh 24 🏥\nPlease choose a specialty:",
+              text: "Welcome to Nobino 🏥\nPaziresh 24 appointment system\nPlease choose a specialty:",
               keyboard: ["General", "Dental", "Dermatology"],
             },
             { id: 3, from: "user", text: "General" },
@@ -104,7 +104,7 @@ export function HeroTelegramMock() {
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-white">
-            {isRtl ? "پذیرش ۲۴ | نوبت‌دهی" : "Paziresh 24 | Booking"}
+            {isRtl ? "نوبینو | پذیرش ۲۴" : "Nobino | Paziresh 24"}
           </p>
           <p className="text-[10px] text-emerald-400">
             {isRtl ? "بات نوبت‌دهی — آنلاین" : "Appointment bot — online"}
@@ -174,7 +174,7 @@ export function HeroTelegramMock() {
       </div>
 
       <div className="border-t border-white/5 bg-[#17212b] px-4 py-2 font-mono text-[10px] text-muted">
-        Telegram · {isRtl ? "پذیرش ۲۴ — نوبت پزشک" : "Paziresh 24 — Doctor Booking"}
+        Telegram · {isRtl ? "نوبینو — نوبت‌دهی پذیرش ۲۴" : "Nobino — Paziresh 24 Booking"}
       </div>
     </div>
   );

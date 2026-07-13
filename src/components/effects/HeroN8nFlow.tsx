@@ -64,7 +64,7 @@ export function HeroN8nFlow() {
     () =>
       isRtl
         ? [
-            { id: "tg", label: "پذیرش۲۴", sub: "Bot", icon: Bot, color: "#0EA5E9", x: 5, y: 50, step: 0 },
+            { id: "tg", label: "نوبینو", sub: "Bot", icon: Bot, color: "#0EA5E9", x: 5, y: 50, step: 0 },
             { id: "hook", label: "Webhook", sub: "POST", icon: Link2, color: "#6366F1", x: 17, y: 50, step: 1 },
             { id: "ai", label: "NLP", sub: "Intent", icon: Sparkles, color: "#A855F7", x: 29, y: 50, step: 2 },
             { id: "cal", label: "تقویم", sub: "API", icon: CalendarDays, color: "#14B8A6", x: 41, y: 50, step: 3 },
@@ -77,7 +77,7 @@ export function HeroN8nFlow() {
             { id: "reply", label: "پاسخ", sub: "بیمار", icon: MessageCircle, color: "#22D3EE", x: 89, y: 78, step: 10 },
           ]
         : [
-            { id: "tg", label: "Paziresh24", sub: "Bot", icon: Bot, color: "#0EA5E9", x: 5, y: 50, step: 0 },
+            { id: "tg", label: "Nobino", sub: "Bot", icon: Bot, color: "#0EA5E9", x: 5, y: 50, step: 0 },
             { id: "hook", label: "Webhook", sub: "POST", icon: Link2, color: "#6366F1", x: 17, y: 50, step: 1 },
             { id: "ai", label: "NLP", sub: "Intent", icon: Sparkles, color: "#A855F7", x: 29, y: 50, step: 2 },
             { id: "cal", label: "Calendar", sub: "API", icon: CalendarDays, color: "#14B8A6", x: 41, y: 50, step: 3 },
@@ -112,7 +112,7 @@ export function HeroN8nFlow() {
     () =>
       isRtl
         ? [
-            "▶ پیام بیمار از بات پذیرش ۲۴...",
+            "▶ پیام بیمار از بات نوبینو...",
             "▶ Webhook دریافت درخواست نوبت...",
             "▶ تشخیص intent: «رزرو نوبت عمومی»...",
             "▶ بررسی تقویم دکتر احمدی...",
@@ -126,7 +126,7 @@ export function HeroN8nFlow() {
             "✓ نوبت ثبت شد — ۰.۹ ثانیه",
           ]
         : [
-            "▶ Patient message from Paziresh 24 bot...",
+            "▶ Patient message from Nobino bot...",
             "▶ Webhook received booking request...",
             "▶ Intent detected: general appointment...",
             "▶ Checking Dr. Ahmadi calendar...",
@@ -159,7 +159,7 @@ export function HeroN8nFlow() {
         <div className="flex items-center gap-1.5">
           <Zap size={13} className="text-emerald-400" />
           <span className="font-mono text-[10px] font-medium text-slate-200 sm:text-[11px]">
-            {isRtl ? "n8n — پذیرش ۲۴ نوبت‌دهی" : "n8n — Paziresh 24 Booking"}
+            {isRtl ? "n8n — نوبینو | پذیرش ۲۴" : "n8n — Nobino | Paziresh 24"}
           </span>
         </div>
         <div className="flex items-center gap-1.5">
