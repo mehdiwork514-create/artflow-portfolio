@@ -12,7 +12,7 @@ export const siteConfig = {
 export const stats: Stat[] = [
   { id: "experience", value: "4+", icon: "briefcase" },
   { id: "projects", value: "15+", icon: "folder" },
-  { id: "skills", value: "12+", icon: "code" },
+  { id: "skills", value: "15+", icon: "code" },
 ];
 
 export const skillCategories: SkillCategory[] = [
@@ -61,6 +61,24 @@ export const skillCategories: SkillCategory[] = [
     level: 86,
     color: "#06B6D4",
     icon: "teaser",
+  },
+  {
+    id: "smartAutomation",
+    level: 88,
+    color: "#10B981",
+    icon: "automation",
+  },
+  {
+    id: "telegramBots",
+    level: 85,
+    color: "#0EA5E9",
+    icon: "bot",
+  },
+  {
+    id: "n8n",
+    level: 84,
+    color: "#FF6D5A",
+    icon: "n8n",
   },
 ];
 

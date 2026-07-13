@@ -3,6 +3,7 @@
 import { useRef, useState, type ComponentType, type MouseEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  Bot,
   Braces,
   Clapperboard,
   Code2,
@@ -17,7 +18,9 @@ import {
   Palette,
   Server,
   Terminal,
+  Waypoints,
   Wind,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/context/LanguageContext";
@@ -30,6 +33,9 @@ const iconMap: Record<string, ComponentType<{ size?: number; className?: string 
   wood: Hammer,
   poster: LayoutTemplate,
   teaser: Clapperboard,
+  automation: Zap,
+  bot: Bot,
+  n8n: Waypoints,
   html: FileCode,
   css: Layers,
   javascript: Braces,
