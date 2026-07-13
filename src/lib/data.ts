@@ -151,4 +151,11 @@ export default function Home() {
   </main>
   );
 }`,
+  `// Telegram Bot + n8n Automation
+bot.on('message', async (ctx) => {
+  const order = await n8n.trigger(
+    'order-workflow', ctx.message
+  );
+  return ctx.reply(order.status);
+});`,
 ];

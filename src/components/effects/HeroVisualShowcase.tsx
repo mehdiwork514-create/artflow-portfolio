@@ -4,6 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import dynamic from "next/dynamic";
 import { CodeTerminal } from "@/components/effects/CodeTerminal";
+import { HeroN8nFlow } from "@/components/effects/HeroN8nFlow";
+import { HeroTelegramMock } from "@/components/effects/HeroTelegramMock";
+import { HeroWoodCircuit } from "@/components/effects/HeroWoodCircuit";
 import { cn } from "@/lib/utils";
 
 const HeroOrbVisual = dynamic(
@@ -14,8 +17,19 @@ const HeroOrbVisual = dynamic(
   },
 );
 
-const DISPLAY_MS = 18000;
-const PAUSE_BEFORE_SWITCH_MS = 1000;
+const SLIDES = ["code", "n8n", "telegram", "wood", "orb"] as const;
+type SlideId = (typeof SLIDES)[number];
+
+const SLIDE_LABELS: Record<SlideId, string> = {
+  code: "Code terminal",
+  n8n: "n8n automation flow",
+  telegram: "Telegram bot chat",
+  wood: "Wood craft and circuit",
+  orb: "3D brand orb",
+};
+
+const DISPLAY_MS = 14000;
+const PAUSE_BEFORE_SWITCH_MS = 900;
 const ENTER_DELAY_S = 0.6;
 const ENTER_DURATION_S = 1.15;
 const EXIT_DURATION_S = 0.95;
@@ -39,8 +53,28 @@ function buildVariants(withEnterDelay: boolean): Variants {
   };
 }
 
+function nextSlide(current: SlideId): SlideId {
+  const index = SLIDES.indexOf(current);
+  return SLIDES[(index + 1) % SLIDES.length];
+}
+
+function renderSlide(id: SlideId) {
+  switch (id) {
+    case "code":
+      return <CodeTerminal />;
+    case "n8n":
+      return <HeroN8nFlow />;
+    case "telegram":
+      return <HeroTelegramMock />;
+    case "wood":
+      return <HeroWoodCircuit />;
+    case "orb":
+      return <HeroOrbVisual />;
+  }
+}
+
 export function HeroVisualShowcase() {
-  const [active, setActive] = useState<"code" | "orb">("code");
+  const [active, setActive] = useState<SlideId>("code");
   const [isPreparingSwitch, setIsPreparingSwitch] = useState(false);
   const [hasSwitched, setHasSwitched] = useState(false);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -63,7 +97,7 @@ export function HeroVisualShowcase() {
       setIsPreparingSwitch(true);
 
       queueTimer(() => {
-        setActive((prev) => (prev === "code" ? "orb" : "code"));
+        setActive((prev) => nextSlide(prev));
         setHasSwitched(true);
         setIsPreparingSwitch(false);
         startCycle();
@@ -77,7 +111,7 @@ export function HeroVisualShowcase() {
     return clearTimers;
   }, [startCycle, clearTimers]);
 
-  const handleManualSwitch = (item: "code" | "orb") => {
+  const handleManualSwitch = (item: SlideId) => {
     if (item === active) return;
     clearTimers();
     setIsPreparingSwitch(false);
@@ -94,29 +128,16 @@ export function HeroVisualShowcase() {
 
       <div className="relative h-[20rem] w-full overflow-hidden rounded-2xl border border-white/10 bg-[#030712] shadow-2xl shadow-indigo-500/20 md:h-[24rem]">
         <AnimatePresence mode="wait">
-          {active === "code" ? (
-            <motion.div
-              key="code"
-              variants={variants}
-              initial={hasSwitched ? "initial" : false}
-              animate="animate"
-              exit="exit"
-              className="absolute left-0 top-0 h-full w-full"
-            >
-              <CodeTerminal />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="orb"
-              variants={variants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="absolute left-0 top-0 h-full w-full"
-            >
-              <HeroOrbVisual />
-            </motion.div>
-          )}
+          <motion.div
+            key={active}
+            variants={variants}
+            initial={hasSwitched ? "initial" : false}
+            animate="animate"
+            exit="exit"
+            className="absolute left-0 top-0 h-full w-full"
+          >
+            {renderSlide(active)}
+          </motion.div>
         </AnimatePresence>
 
         {isPreparingSwitch && (
@@ -131,16 +152,16 @@ export function HeroVisualShowcase() {
         <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10" />
       </div>
 
-      <div className="mt-5 flex items-center justify-center gap-2">
-        {(["code", "orb"] as const).map((item) => (
+      <div className="mt-5 flex items-center justify-center gap-1.5">
+        {SLIDES.map((item) => (
           <button
             key={item}
             type="button"
             onClick={() => handleManualSwitch(item)}
-            aria-label={item === "code" ? "Show code" : "Show 3D orb"}
+            aria-label={SLIDE_LABELS[item]}
             className={cn(
               "h-2 rounded-full transition-all duration-700",
-              active === item ? "w-8 bg-gradient-to-r from-indigo-500 to-cyan-500" : "w-2 bg-white/20",
+              active === item ? "w-7 bg-gradient-to-r from-indigo-500 to-cyan-500" : "w-2 bg-white/20",
             )}
           />
         ))}
