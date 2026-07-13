@@ -42,7 +42,7 @@ export const translations = {
       subtitle: "درباره من",
       title: "خلاقیت در هر پروژه",
       description: "علاقه‌مند به ساخت محصولاتی که تفاوت ایجاد می‌کنند",
-      text: "من محمد مهدی سلیمیان هستم؛ طراح و توسعه‌دهنده وب، تدوینگر، کارشناس فتوشاپ و هنرمند منبت و معرق چوب. از طراحی سایت‌های مدرن و ریسپانسیو گرفته تا تدوین ویدیو، طراحی پوستر و ساخت تیزر — هر پروژه را با دقت و خلاقیت انجام می‌دهم. همچنین یکی از توسعه‌دهندگان تیم پذیرش ۲۴ و بات نوبت‌دهی نوبینو هستم. هدف من ترکیب هنر و تکنولوژی برای ارائه بهترین نتیجه به مشتریانم است.",
+      text: "من محمد مهدی سلیمیان هستم؛ طراح و توسعه‌دهنده وب، تدوینگر، کارشناس فتوشاپ و هنرمند منبت و معرق چوب. از طراحی سایت‌های مدرن و ریسپانسیو گرفته تا تدوین ویدیو، طراحی پوستر و ساخت تیزر — هر پروژه را با دقت و خلاقیت انجام می‌دهم. از توسعه‌دهندگان تیم پذیرش ۲۴ هستم و در توسعه بات نوبت‌دهی نوبینو مشارکت دارم. هدف من ترکیب هنر و تکنولوژی برای ارائه بهترین نتیجه به مشتریانم است.",
       location: "ایران",
       tags: ["خلاق", "دقیق", "متعهد", "یادگیرنده سریع"],
       stats: {
@@ -131,15 +131,9 @@ export const translations = {
         },
         "5": {
           title: "توسعه‌دهنده بات تلگرام",
-          company: "پروژه‌های مستقل",
-          description:
-            "ساخت بات‌های تلگرامی هوشمند برای پاسخگویی خودکار، مدیریت سفارش، اطلاع‌رسانی و اتصال به API و پنل‌های مدیریتی.",
-        },
-        "6": {
-          title: "توسعه‌دهنده بات نوبینو",
           company: "پذیرش ۲۴",
           description:
-            "توسعه بات نوبت‌دهی نوبینو در تلگرام؛ یکی از اعضای تیم توسعه پذیرش ۲۴ — رزرو نوبت، یادآوری و اتوماسیون فرایند پذیرش.",
+            "توسعه بات نوبت‌دهی نوبینو برای سامانه پذیرش ۲۴؛ از اعضای تیم توسعه — رزرو نوبت، یادآوری خودکار و اتوماسیون فرایند پذیرش بیماران.",
         },
       },
     },
@@ -220,7 +214,7 @@ export const translations = {
       subtitle: "About Me",
       title: "Creativity in Every Project",
       description: "Passionate about building products that make a difference",
-      text: "I'm Mohammad Mahdi Salimian — a web designer and developer, video editor, Photoshop expert, and wood carving & inlay artist. From modern responsive websites to video editing, poster design, and teaser production — I approach every project with creativity and attention to detail. I'm also on the Paziresh 24 dev team, building Nobino, their Telegram appointment bot. My goal is blending art and technology to deliver the best results for my clients.",
+      text: "I'm Mohammad Mahdi Salimian — a web designer and developer, video editor, Photoshop expert, and wood carving & inlay artist. From modern responsive websites to video editing, poster design, and teaser production — I approach every project with creativity and attention to detail. I'm on the Paziresh 24 development team, contributing to Nobino, their Telegram appointment bot. My goal is blending art and technology to deliver the best results for my clients.",
       location: "Iran",
       tags: ["Creative", "Precise", "Committed", "Fast Learner"],
       stats: {
@@ -309,15 +303,9 @@ export const translations = {
         },
         "5": {
           title: "Telegram Bot Developer",
-          company: "Independent Projects",
-          description:
-            "Building smart Telegram bots for auto-replies, order management, notifications, and integration with APIs and admin panels.",
-        },
-        "6": {
-          title: "Nobino Bot Developer",
           company: "Paziresh 24",
           description:
-            "Developing Nobino, the Telegram appointment bot for Paziresh 24 — member of the dev team; booking, reminders, and reception automation.",
+            "Developing Nobino, the appointment bot for Paziresh 24 — on the dev team; patient booking, auto-reminders, and reception workflow automation.",
         },
       },
     },
@@ -369,7 +357,6 @@ export function getExperiencePeriod(id: string, locale: Locale): string {
       "3": "۱۳۹۹ — اکنون",
       "4": "۱۴۰۳ — اکنون",
       "5": "۱۴۰۳ — اکنون",
-      "6": "۱۴۰۳ — اکنون",
     },
     en: {
       "1": "2023 — Present",
@@ -377,7 +364,6 @@ export function getExperiencePeriod(id: string, locale: Locale): string {
       "3": "2020 — Present",
       "4": "2024 — Present",
       "5": "2024 — Present",
-      "6": "2024 — Present",
     },
   };
   return periods[locale][id] ?? "";
