@@ -129,6 +129,10 @@ body {
 }
 
 /* Section spacing */
+section[id] {
+  scroll-margin-top: 5.5rem;
+}
+
 .section-padding {
   padding: 6rem 1.5rem;
 }

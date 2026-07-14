@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type MouseEvent } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
@@ -18,11 +18,36 @@ const hrefMap: Record<string, string> = {
   contact: "#contact",
 };
 
+const NAV_OFFSET = 80;
+const MOBILE_MENU_CLOSE_MS = 300;
+
 export function Navbar() {
   const { t } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
+
+  const scrollToSection = useCallback((sectionId: string) => {
+    const el = document.getElementById(sectionId);
+    if (!el) return;
+
+    const top = el.getBoundingClientRect().top + window.scrollY - NAV_OFFSET;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    window.history.replaceState(null, "", hrefMap[sectionId]);
+    setActiveSection(sectionId);
+  }, []);
+
+  const handleNavClick = useCallback(
+    (sectionId: string, closeMenu = false) => (e: MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+
+      if (closeMenu) setMobileOpen(false);
+
+      const delay = closeMenu ? MOBILE_MENU_CLOSE_MS : 0;
+      window.setTimeout(() => scrollToSection(sectionId), delay);
+    },
+    [scrollToSection],
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -135,19 +160,19 @@ export function Navbar() {
             <ul className="flex flex-col gap-1 px-6 py-4">
               {navLinkIds.map((id) => (
                 <li key={id}>
-                  <a
-                    href={hrefMap[id]}
-                    onClick={() => setMobileOpen(false)}
-                    className="block rounded-lg px-4 py-3 text-sm transition-colors hover:bg-white/5"
-                  >
-                    {getLabel(id)}
-                  </a>
+              <a
+                href={hrefMap[id]}
+                onClick={handleNavClick(id, true)}
+                className="block rounded-lg px-4 py-3 text-sm transition-colors hover:bg-white/5"
+              >
+                {getLabel(id)}
+              </a>
                 </li>
               ))}
               <li>
                 <a
                   href="#contact"
-                  onClick={() => setMobileOpen(false)}
+                  onClick={handleNavClick("contact", true)}
                   className="mt-2 block rounded-full bg-gradient-to-r from-indigo-500 to-cyan-500 px-4 py-3 text-center text-sm font-medium text-white"
                 >
                   {t.nav.hireMe}
